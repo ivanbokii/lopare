@@ -1,0 +1,9 @@
+1. Move handlers to another module (done)
+2. Test that you can pass error state between handlers (done)
+ 2.1 Test with real scripts (done)
+3. Provide 100% coverage with tests or find a way to test your code
+4. Add logging for the main runner
+5. Add job status log with execution time
+6. Add time parsing or just use cron time format
+
+6. Create a web interface to show lopare status

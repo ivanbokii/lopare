@@ -2,62 +2,11 @@
   "jobs": [
     {
       "name": "cache-population-and-out-of-contact-alerts",
+      "entry": "index.js",
       "arg": null,
       "retries": 3,
       "repeat": {
-        "minute": 5
-      }
-    },
-    {
-      "name": "30-days-utilisation",
-      "arg": {
-        "delay": 1000,
-        "throughputChanges": [
-          {
-            "tableName": "elemez.production.metrics.daily.devices.activity",
-            "read": 60,
-            "write": 0
-          },
-          {
-            "tableName": "elemez.production.citizens",
-            "read": 75,
-            "write": 0
-          },
-          {
-            "tableName": "elemez.production.metrics.daily.devices.utilisation.30days",
-            "read": 0,
-            "write": 360
-          },
-          {
-            "tableName": "elemez.production.metrics.daily.devices.group.utilisation.30days",
-            "read": 0,
-            "write": 360
-          },
-          {
-            "tableName": "elemez.production.metrics.daily.devices.nci.utilisation.30days",
-            "read": 0,
-            "write": 360
-          },
-          {
-            "tableName": "elemez.production.metrics.daily.devices.non.utilisation.30days",
-            "read": 0,
-            "write": 360
-          },
-          {
-            "tableName": "elemez.production.metrics.daily.devices.swversion.utilisation.30days",
-            "read": 0,
-            "write": 360
-          },
-          {
-            "tableName": "elemez.production.metrics.daily.devices.tac.utilisation.30days",
-            "read": 0,
-            "write": 360
-          }
-        ]
-      },
-      "retries": 3,
-      "repeat": {
-        "minute": 2
+        "minute": 30
       }
     }
   ]
