@@ -14,13 +14,13 @@
              :handler handlers/run-job
              :pre-hook handlers/pre-job
              :post-hook handlers/post-job
-             :schedule (str "/" (get-in job-config [:repeat :minute]) " * * * * * *")
+             :schedule (:schedule job-config)
              :opts job-config}]
-    (println (str "creating job for " (:name job-config)))
     job))
 
 (defn -main
   [& args]
-  (let [schedules (map make-schedule (config :jobs))
+  (let [jobs ((get-config) :jobs)
+        schedules (doall (map make-schedule jobs))
         cronj (scheduler/cronj :entries schedules)]
     (scheduler/start! cronj)))

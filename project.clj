@@ -9,4 +9,5 @@
                  [org.clojure/data.json "0.2.6"]]
   :main ^:skip-aot lopare.core
   :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}})
+  :profiles {:uberjar {:aot :all}
+             :dev {:dependencies [[midje "1.6.3"]]}})
