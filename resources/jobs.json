@@ -2,6 +2,7 @@
   "jobs": [
     {
       "name": "cache-population-and-out-of-contact-alerts",
+      "exec": "node",
       "entry": "index.js",
       "arg": null,
       "retries": 3,

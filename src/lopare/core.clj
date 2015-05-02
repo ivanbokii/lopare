@@ -20,7 +20,7 @@
 
 (defn -main
   [& args]
-  (let [jobs ((get-config) :jobs)
+  (let [jobs (config :jobs)
         schedules (doall (map make-schedule jobs))
         cronj (scheduler/cronj :entries schedules)]
     (scheduler/start! cronj)))

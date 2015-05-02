@@ -2,18 +2,19 @@
   (:require [me.raynes.conch :as shell]
             [clojure.data.json :as json]))
 
+(defn run-shell
+  [job-config additional-param]
+  (let [executable (:exec job-config)
+        path-to-job-dir (str "./jobs/" (:name job-config))
+        path-to-job (str path-to-job-dir "/" (:entry job-config))]
+    (shell/let-programs [exec executable] (exec path-to-job (json/write-str job-config) additional-param :dir path-to-job-dir))))
+
 (defn execute-shell-job
   [job-config additional-param]
-  (let [path-to-node "/usr/local/bin/node"
-        path-to-job-dir (str "./jobs/" (:name job-config) "/")
-        path-to-job (str "./jobs/" (:name job-config) "/" (:entry job-config))]
-    (try
-      (shell/let-programs [node path-to-node]
-                          (node path-to-job (json/write-str job-config) additional-param :dir path-to-job-dir))
-      job-config
-      (catch Exception e (do
-                           (println "Caught exception: " e)
-                           {:error true :exception e})))))
+  (try
+    (run-shell job-config additional-param)
+    job-config
+    (catch Exception e {:error true :exception (str  e)})))
 
 (defn pre-job
   [time job-config]
