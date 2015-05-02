@@ -19,7 +19,21 @@
               (execute-shell-job ..job-config.. "pre") => ..job-config..)))
 
 (facts "run-job"
-       (fact "should execute shell job with"
+       (fact "should execute shell job when there is no error"
              (run-job ..time.. ..job-config..) => ..job-config..
              (provided
-              (execute-shell-job ..job-config.. "") => ..job-config..)))
+              (execute-shell-job ..job-config.. "") => ..job-config..))
+       (fact "should not execute shell job when there is an error"
+             (run-job ..time.. {:error true :exception "some error"}) => anything
+             (provided
+              (execute-shell-job ..job-config.. "") => anything :times 0)))
+
+(facts "post-job"
+       (fact "should execute shell job with a 'post' param if there is no error"
+             (post-job ..time.. ..job-config..) => ..job-config..
+             (provided
+              (execute-shell-job ..job-config.. "post") => ..job-config..))
+      (fact "should not execute shell job when there is an error"
+             (post-job ..time.. {:error true :exception "some error"}) => anything
+             (provided
+              (execute-shell-job ..job-config.. "post") => anything :times 0)))

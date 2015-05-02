@@ -24,10 +24,10 @@
   [time job-config]
   (if-not (:error job-config)
     (execute-shell-job job-config "")
-    (println "JOB: Skip because of error on the previous step")))
+    (println "JOB: Run job is skipped because of error on the previous step")))
 
 (defn post-job
   [time job-config]
   (if-not (:error job-config)
     (execute-shell-job job-config "post")
-    (println "POST: Skip because of error on the previous step")))
+    (println "POST: Post job is skipped because of error on the previous step")))
