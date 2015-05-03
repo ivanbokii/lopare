@@ -1,8 +1,16 @@
 (ns lopare.core
   (:require [carica.core :as carica]
             [cronj.core :as scheduler]
-            [lopare.handlers :as handlers])
+            [lopare.handlers :as handlers]
+            [taoensso.timbre :as timbre]
+            [taoensso.timbre.appenders.rolling :as rolling])
   (:gen-class))
+
+;;configure logging
+(timbre/refer-timbre)
+(timbre/set-config!
+ [:appenders :rolling]
+ (rolling/make-rolling-appender {:enabled? true} {:path "log/lopare.log" :pattern :weekly}))
 
 ;;set config to jobs.json
 (def config (carica/configurer (carica/resources "jobs.json")))

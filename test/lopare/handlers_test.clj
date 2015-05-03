@@ -30,7 +30,7 @@
 
 (facts "post-job"
        (fact "should execute shell job with a 'post' param if there is no error"
-             (post-job ..time.. ..job-config..) => ..job-config..
+             (post-job ..time.. ..job-config..) => anything
              (provided
               (execute-shell-job ..job-config.. "post") => ..job-config..))
       (fact "should not execute shell job when there is an error"

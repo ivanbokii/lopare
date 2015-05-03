@@ -1,6 +1,9 @@
 (ns lopare.handlers
   (:require [me.raynes.conch :as shell]
-            [clojure.data.json :as json]))
+            [clojure.data.json :as json]
+            [taoensso.timbre :as timbre]))
+
+(timbre/refer-timbre)
 
 (defn run-shell
   [job-config additional-param]
@@ -18,16 +21,22 @@
 
 (defn pre-job
   [time job-config]
+  (info "Starting job: " (:name job-config))
   (execute-shell-job job-config "pre"))
 
 (defn run-job
   [time job-config]
+  (info "Running job: " (:name job-config))
   (if-not (:error job-config)
     (execute-shell-job job-config "")
-    (println "JOB: Run job is skipped because of error on the previous step")))
+    (error (:name job-config) ": RUN is skipped because of error on the previous step")))
 
 (defn post-job
   [time job-config]
+  (info "Finishing job: " (:name job-config))
   (if-not (:error job-config)
-    (execute-shell-job job-config "post")
-    (println "POST: Post job is skipped because of error on the previous step")))
+    (do
+      (execute-shell-job job-config "post")
+      (info "Finished job: " (:name job-config)))
+    (error (:name job-config) ": POST is skipped because of error on the previous step"))
+  (info "Finished job: " (:name job-config)))
