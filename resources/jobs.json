@@ -1,14 +1,12 @@
 {
   "jobs": [
     {
-      "name": "cache-population-and-out-of-contact-alerts",
+      "name": "test-job",
       "exec": "node",
       "entry": "index.js",
       "arg": null,
       "retries": 3,
-      "repeat": {
-        "minute": 30
-      }
+      "schedule": "/5 * * * * * *"
     }
   ]
 }

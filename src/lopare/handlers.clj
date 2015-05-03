@@ -1,5 +1,5 @@
 (ns lopare.handlers
-  (:require [me.raynes.conch :as shell]
+  (:require [me.raynes.conch.low-level :as shell]
             [clojure.data.json :as json]
             [taoensso.timbre :as timbre]))
 
@@ -10,14 +10,14 @@
   (let [executable (:exec job-config)
         path-to-job-dir (str "./jobs/" (:name job-config))
         path-to-job (str path-to-job-dir "/" (:entry job-config))]
-    (shell/let-programs [exec executable] (exec path-to-job (json/write-str job-config) additional-param :dir path-to-job-dir))))
+    (shell/proc executable path-to-job (json/write-str job-config additional-param :dir path-to-job-dir))))
 
 (defn execute-shell-job
   [job-config additional-param]
   (try
     (run-shell job-config additional-param)
     job-config
-    (catch Exception e {:error true :exception (str  e)})))
+    (catch Exception e {:name (:name job-config) :error true :exception (str  e)})))
 
 (defn pre-job
   [time job-config]
@@ -29,7 +29,7 @@
   (info "Running job: " (:name job-config))
   (if-not (:error job-config)
     (execute-shell-job job-config "")
-    (error (:name job-config) ": RUN is skipped because of error on the previous step")))
+    (error (:name job-config) ": RUN is skipped because of error on the previous step" job-config)))
 
 (defn post-job
   [time job-config]

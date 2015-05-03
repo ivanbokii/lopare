@@ -2,17 +2,17 @@ var fs = require('fs');
 var type = process.argv[3];
 
 if (type === 'pre') {
-  fs.appendFile('log', "pre\n", function() {
+  fs.appendFile('./superlog', "pre\n", function() {
     setTimeout(function() {
-      process.exit(1);
+      process.exit(0);
     }, 2000);
   });
 } else if (type === 'post') {
-  fs.appendFile('log', "post\n", function() {
+  fs.appendFile('./superlog', "post\n", function() {
     process.exit(0);
   });
 } else {
-  fs.appendFile('log', "MAIN PROCESS\n", function() {
+  fs.appendFile('./superlog', "MAIN PROCESS\n", function() {
     process.exit(0);
   });
 }
