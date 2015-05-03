@@ -38,5 +38,4 @@
     (do
       (execute-shell-job job-config "post")
       (info "Finished job: " (:name job-config)))
-    (error (:name job-config) ": POST is skipped because of error on the previous step"))
-  (info "Finished job: " (:name job-config)))
+    (error (:name job-config) ": POST is skipped because of error on the previous step")))
