@@ -7,15 +7,20 @@
 
 (defn run-shell
   [job-config additional-param]
-  (let [executable (:exec job-config)
-        entry (:entry job-config)
-        path-to-job-dir (str "./jobs/" (:name job-config))
-        result (shell/sh executable entry (json/write-str job-config) additional-param :dir path-to-job-dir)]
-    (if (not= (:exit result) 0)
-      (do
-        (error (:name job-config) additional-param "Error: " result)
-        (assoc job-config :error (:err result)))
-      job-config)))
+  (try
+    (let [executable (clojure.string/split (:exec job-config) #" ")
+          entry (:entry job-config)
+          path-to-job-dir (str "./jobs/" (:name job-config))
+          shell-params (concat executable [entry (json/write-str job-config) additional-param :dir path-to-job-dir])
+          result (apply shell/sh shell-params)]
+      (if (not= (:exit result) 0)
+        (do
+          (error (:name job-config) additional-param "Error: " result)
+          (assoc job-config :error (:err result)))
+        job-config))
+    (catch Exception e (do
+                         (error e)
+                         {:name (:name job-config) :error e}))))
 
 (defn pre-job
   [time job-config]
