@@ -14,17 +14,17 @@
   (facts "run-shell"
          (let [job-config {:name "job"
                            :entry ..entry..
-                           :exec ..exec..}]
+                           :exec "node"}]
            (fact "should execute a shell command and return job-config if command succeded"
                  (run-shell job-config ..param..) => job-config
                  (provided
                   (json/write-str job-config) => ..json..
-                  (shell/sh ..exec.. ..entry.. ..json.. ..param.. :dir "./jobs/job") => {:exit 0}))
+                  (shell/sh "node" ..entry.. ..json.. ..param.. :dir "./jobs/job") => {:exit 0}))
            (fact "should execute a shell command and return error map if command failed"
                  (run-shell job-config ..param..) => (assoc job-config :error "some error")
                  (provided
                   (json/write-str job-config) => ..json..
-                  (shell/sh ..exec.. ..entry.. ..json.. ..param.. :dir "./jobs/job") => {:exit 1 :err "some error"}))))
+                  (shell/sh "node" ..entry.. ..json.. ..param.. :dir "./jobs/job") => {:exit 1 :err "some error"}))))
 
   (facts "pre-job"
          (fact "should execute shell job with a 'pre' param"
