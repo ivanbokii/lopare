@@ -18,10 +18,10 @@
                                                                  :schedule ..schedule..}}))
 
 (fact "should schedule cronj"
-      (with-redefs [lopare/config {:jobs [..job1.. ..job2..]}]
-        (lopare/-main) => ..cronj-started..
-        (provided
-         (lopare/make-schedule ..job1..) => ..schedule1..
-         (lopare/make-schedule ..job2..) => ..schedule2..
-         (scheduler/cronj :entries [..schedule1.. ..schedule2..]) => ..cronj..
-         (scheduler/start! ..cronj..) => ..cronj-started..)))
+      (lopare/-main) => ..cronj-started..
+      (provided
+       (lopare/get-config) => {:jobs [..job1.. ..job2..]}
+       (lopare/make-schedule ..job1..) => ..schedule1..
+       (lopare/make-schedule ..job2..) => ..schedule2..
+       (scheduler/cronj :entries [..schedule1.. ..schedule2..]) => ..cronj..
+       (scheduler/start! ..cronj..) => ..cronj-started..))

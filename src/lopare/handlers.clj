@@ -1,5 +1,5 @@
 (ns lopare.handlers
-  (:require [me.raynes.conch.low-level :as shell]
+  (:require [clojure.java.shell2 :as shell]
             [clojure.data.json :as json]
             [taoensso.timbre :as timbre]))
 
@@ -8,34 +8,30 @@
 (defn run-shell
   [job-config additional-param]
   (let [executable (:exec job-config)
+        entry (:entry job-config)
         path-to-job-dir (str "./jobs/" (:name job-config))
-        path-to-job (str path-to-job-dir "/" (:entry job-config))]
-    (shell/proc executable path-to-job (json/write-str job-config additional-param :dir path-to-job-dir))))
-
-(defn execute-shell-job
-  [job-config additional-param]
-  (try
-    (run-shell job-config additional-param)
-    job-config
-    (catch Exception e {:name (:name job-config) :error true :exception (str  e)})))
+        result (shell/sh executable entry (json/write-str job-config) additional-param :dir path-to-job-dir)]
+    (if (not= (:exit result) 0)
+      (do
+        (error (:name job-config) additional-param "Error: " result)
+        (assoc job-config :error (:err result)))
+      job-config)))
 
 (defn pre-job
   [time job-config]
   (info "Starting job: " (:name job-config))
-  (execute-shell-job job-config "pre"))
+  (run-shell job-config "pre"))
 
 (defn run-job
   [time job-config]
   (info "Running job: " (:name job-config))
   (if-not (:error job-config)
-    (execute-shell-job job-config "")
-    (error (:name job-config) ": RUN is skipped because of error on the previous step" job-config)))
+    (run-shell job-config "")
+    (error (:name job-config) ": RUN is skipped because of error on the previous step")))
 
 (defn post-job
   [time job-config]
-  (info "Finishing job: " (:name job-config))
-  (if-not (:error job-config)
-    (do
-      (execute-shell-job job-config "post")
-      (info "Finished job: " (:name job-config)))
+  (if-not (or (:error (:result job-config)) (:error job-config))
+    (let [result (run-shell job-config "post")]
+      (when-not (:error result) (info "Finished job: " (:name job-config))))
     (error (:name job-config) ": POST is skipped because of error on the previous step")))

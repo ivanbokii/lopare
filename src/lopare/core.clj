@@ -1,8 +1,8 @@
 (ns lopare.core
-  (:require [carica.core :as carica]
-            [cronj.core :as scheduler]
+  (:require [cronj.core :as scheduler]
             [lopare.handlers :as handlers]
             [taoensso.timbre :as timbre]
+            [clojure.data.json :as json]
             [taoensso.timbre.appenders.rolling :as rolling])
   (:gen-class))
 
@@ -10,11 +10,7 @@
 (timbre/refer-timbre)
 (timbre/set-config!
  [:appenders :rolling]
- (rolling/make-rolling-appender {:enabled? true} {:path "log/lopare.log" :pattern :weekly}))
-
-;;set config to jobs.json
-(def config (carica/configurer (carica/resources "jobs.json")))
-(def override-config (carica/overrider config))
+ (rolling/make-rolling-appender {:enabled? true} {:path "./log/lopare.log" :pattern :weekly}))
 
 (defn make-schedule
   [job-config]
@@ -26,9 +22,13 @@
              :opts job-config}]
     job))
 
+(defn get-config
+  []
+  (json/read-str (slurp "./jobs.json") :key-fn keyword))
+
 (defn -main
   [& args]
-  (let [jobs (config :jobs)
+  (let [jobs (:jobs (get-config))
         schedules (doall (map make-schedule jobs))
         cronj (scheduler/cronj :entries schedules)]
     (scheduler/start! cronj)))
