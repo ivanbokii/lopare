@@ -11,10 +11,10 @@
   (let [executable (clojure.string/split (:exec config) #" ")
         entry (:entry config)
         path-to-job-dir (str "./jobs/" (:name config))
-        shell-params (concat executable [entry (json/write-str config) step :dir path-to-job-dir])]
+        shell-params (concat executable [entry (json/write-str config) (name step) :dir path-to-job-dir])]
     (apply shell/sh shell-params)))
 
-(defn error-handler
+(defn error-handler-wrapper
   [fn]
   (try
     (let [result (fn)]
@@ -29,7 +29,7 @@
 (defn pre
   [time config]
   (let [execute (partial run config :pre)
-        result (error-handler execute)
+        result (error-handler-wrapper execute)
         error (:error result)]
     (if error
       {:config config :pre {:error error} :error true :start-time time}
@@ -39,7 +39,7 @@
   [time pre-result]
   (when-not (:error pre-result)
     (let [execute (partial run (:config pre-result) :handler)
-          result (error-handler execute)
+          result (error-handler-wrapper execute)
           error (:error result)]
       (if error
         {:error error}
@@ -49,7 +49,7 @@
   [time handler-result]
   (when-not (or (:error handler-result) (:error (:result handler-result)))
     (let [execute (partial run (:config handler-result) :post)
-          result (error-handler execute)
+          result (error-handler-wrapper execute)
           error (:error result)]
       (if error
         (save-run (assoc handler-result :post {:error error} :end-time (time/local-now)))

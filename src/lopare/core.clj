@@ -15,9 +15,9 @@
 (defn make-schedule
   [job-config]
   (let [job {:id (:name job-config)
-             :handler handlers/run-job
-             :pre-hook handlers/pre-job
-             :post-hook handlers/post-job
+             :handler handlers/handler
+             :pre-hook handlers/pre
+             :post-hook handlers/post
              :schedule (:schedule job-config)
              :opts job-config}]
     job))
