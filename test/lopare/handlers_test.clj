@@ -31,3 +31,28 @@
              (pre ..start-time.. ..config..) => {:config ..config.. :pre {:error "the error"} :error true :start-time ..start-time..}
              (provided
               (error-handler-wrapper anything) => {:error "the error" :exit 1})))
+
+(fact "handler"
+      (fact "should return correct map when no error"
+            (handler ..time.. ..pre-result..) => {:start-time ..time.. :end-time ..end-time..}
+            (provided
+             (error-handler-wrapper anything) => ..job-result..
+             (time/local-now) => ..end-time..))
+      (fact "should return error map when error"
+            (handler ..start-time.. ..config..) => {:error "the error"}
+            (provided
+             (error-handler-wrapper anything) => {:error "the error" :exit 1})))
+
+(facts "post"
+       (fact "should save correct map when no error"
+             (post ..start-time.. {}) => anything
+             (provided
+              (error-handler-wrapper anything) => ..job-result..
+              (save-run {:post {:start-time ..start-time.. :end-time ..end-time..}}) => anything
+              (time/local-now) => ..end-time..))
+       (fact "should save error map when error"
+             (post ..start-time.. {}) => anything
+             (provided
+              (error-handler-wrapper anything) => {:error "the error"}
+              (time/local-now) => ..end-time..
+              (save-run {:post {:error "the error"} :end-time ..end-time..}) => anything)))
