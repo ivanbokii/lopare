@@ -11,7 +11,7 @@
   (let [executable (clojure.string/split (:exec config) #" ")
         entry (:entry config)
         path-to-job-dir (str "./jobs/" (:name config))
-        shell-params (concat executable [entry (json/write-str config) (name step) :dir path-to-job-dir])]
+        shell-params (concat executable [entry (json/write-str (:arg config)) (name step) :dir path-to-job-dir])]
     (apply shell/sh shell-params)))
 
 (defn error-handler-wrapper
@@ -20,7 +20,7 @@
     (let [result (fn)]
       (when-not (= (:exit result) 0)
         {:error result}))
-    (catch Exception e {:error e})))
+    (catch Exception e {:error (.getMessage e)})))
 
 (defn save-run
   [run-result]

@@ -3,52 +3,31 @@
             [midje.sweet :refer :all]
             [taoensso.timbre :as timbre]
             [clojure.java.shell2 :as shell]
-            [clojure.data.json :as json]))
+            [clojure.data.json :as json]
+            [clj-time.local :as time]))
 
 ;;avoid logging in tests
 (timbre/set-level! :fatal)
 
-(let [job {:name "job"}
-      error-job {:name "job" :error true :exception "some error"}]
+(facts "run"
+       (fact "should run shell"
+             (run {:name "job" :exec "exec" :entry "entry" :arg "arguments"} :pre) => {:exit 0 :error "" :output "nothing"}
+             (provided
+              (shell/sh "exec" "entry" "\"arguments\"" "pre" :dir "./jobs/job") => {:exit 0 :error "" :output "nothing"})))
 
-  (facts "run-shell"
-         (let [job-config {:name "job"
-                           :entry ..entry..
-                           :exec "node"}]
-           (fact "should execute a shell command and return job-config if command succeded"
-                 (run-shell job-config ..param..) => job-config
-                 (provided
-                  (json/write-str job-config) => ..json..
-                  (shell/sh "node" ..entry.. ..json.. ..param.. :dir "./jobs/job") => {:exit 0}))
-           (fact "should execute a shell command and return error map if command failed"
-                 (run-shell job-config ..param..) => (assoc job-config :error "some error")
-                 (provided
-                  (json/write-str job-config) => ..json..
-                  (shell/sh "node" ..entry.. ..json.. ..param.. :dir "./jobs/job") => {:exit 1 :err "some error"}))))
+(facts "error handler wrapper"
+       (fact "should return an error object if fn returned an error"
+             (error-handler-wrapper (fn [] {:exit 1 :error "the error"})) => {:error {:exit 1 :error "the error"}})
+       (fact "should return an error if fn throws"
+             (error-handler-wrapper (fn [] (throw (Exception. "error")))) => {:error "error"}))
 
-  (facts "pre-job"
-         (fact "should execute shell job with a 'pre' param"
-               (pre-job ..time.. job) => job
-               (provided
-                (run-shell job "pre") => job)))
-
-  (facts "run-job"
-         (fact "should execute shell job when there is no error"
-               (run-job ..time.. job) => job
-               (provided
-                (run-shell job "") => job))
-
-         (fact "should not execute shell job when there is an error"
-               (run-job ..time.. error-job) => anything
-               (provided
-                (run-shell error-job "") => anything :times 0)))
-
-  (facts "post-job"
-         (fact "should execute shell job with a 'post' param if there is no error"
-               (post-job ..time.. job) => anything
-               (provided
-                (run-shell job "post") => ..job-config..))
-         (fact "should not execute shell job when there is an error"
-               (post-job ..time.. error-job) => anything
-               (provided
-                (run-shell error-job "post") => anything :times 0))))
+(facts "pre"
+       (fact "should return correct map when no error"
+             (pre ..start-time.. ..config..) => {:config ..config.. :pre {:start-time ..start-time.. :end-time ..end-time..} :start-time ..start-time..}
+             (provided
+              (error-handler-wrapper anything) => ..job-result..
+              (time/local-now) => ..end-time..))
+       (fact "should return error map when error"
+             (pre ..start-time.. ..config..) => {:config ..config.. :pre {:error "the error"} :error true :start-time ..start-time..}
+             (provided
+              (error-handler-wrapper anything) => {:error "the error" :exit 1})))
