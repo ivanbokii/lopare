@@ -6,3 +6,4 @@ all:
 	cp -r ./jobs ./build
 	rm -r ./build/stale
 	mkdir ./build/log
+	mkdir ./build/last-runs

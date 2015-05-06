@@ -24,7 +24,7 @@
 
 (defn save-run
   [run-result]
-  (spit "last-run" run-result))
+  (spit (str "./last-runs/" (:name (:config run-result))) (str run-result "\n") :append true))
 
 (defn pre
   [time config]
