@@ -31,4 +31,5 @@
   (let [jobs (:jobs (get-config))
         schedules (doall (map make-schedule jobs))
         cronj (scheduler/cronj :entries schedules)]
+    (println "Lopare started")
     (scheduler/start! cronj)))
