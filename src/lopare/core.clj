@@ -1,23 +1,13 @@
 (ns lopare.core
   (:require [cronj.core :as scheduler]
             [lopare.handlers :as handlers]
-            [taoensso.timbre :as timbre]
-            [clojure.data.json :as json]
-            [taoensso.timbre.appenders.rolling :as rolling])
+            [clojure.data.json :as json])
   (:gen-class))
-
-;;configure logging
-(timbre/refer-timbre)
-(timbre/set-config!
- [:appenders :rolling]
- (rolling/make-rolling-appender {:enabled? true} {:path "./log/lopare.log" :pattern :weekly}))
 
 (defn make-schedule
   [job-config]
   (let [job {:id (:name job-config)
-             :handler handlers/handler
-             :pre-hook handlers/pre
-             :post-hook handlers/post
+             :handler handlers/handle
              :schedule (:schedule job-config)
              :opts job-config}]
     job))
