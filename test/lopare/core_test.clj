@@ -5,14 +5,10 @@
   (:use midje.sweet))
 
 (fact "make-schedule should map job-config to a cronj schedule"
-      (with-redefs [handlers/handler ..run-job..
-                    handlers/pre ..pre-job..
-                    handlers/post ..post-job..]
+      (with-redefs [handlers/handle ..run-job..]
         (lopare/make-schedule
          {:name ..job-name.. :schedule ..schedule..}) => {:id ..job-name..
                                                           :handler ..run-job..
-                                                          :pre-hook ..pre-job..
-                                                          :post-hook ..post-job..
                                                           :schedule ..schedule..
                                                           :opts {:name ..job-name..
                                                                  :schedule ..schedule..}}))

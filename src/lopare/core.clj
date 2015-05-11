@@ -12,12 +12,10 @@
              :opts job-config}]
     job))
 
-(defn get-config
-  []
+(defn get-config []
   (json/read-str (slurp "./jobs.json") :key-fn keyword))
 
-(defn -main
-  [& args]
+(defn -main [& args]
   (let [jobs (:jobs (get-config))
         schedules (doall (map make-schedule jobs))
         cronj (scheduler/cronj :entries schedules)]

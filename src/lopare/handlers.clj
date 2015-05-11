@@ -3,8 +3,10 @@
             [clojure.data.json :as json]
             [clj-time.local :as time]))
 
-(defn run
-  [config step]
+(defn- time-dump []
+  (str (java.util.Date.)))
+
+(defn run [config step]
   (let [
         executable (clojure.string/split (:exec config) #" ")
         entry (:entry config)
@@ -12,16 +14,14 @@
         shell-params (concat executable [entry (json/write-str (:arg config)) (name step) :dir path-to-job-dir])]
     (apply shell/sh shell-params)))
 
-(defn error-handler-wrapper
-  [fun]
+(defn error-handler-wrapper [fun]
   (try
     (let [result (fun)]
       (when-not (= (:exit result) 0)
         {:error result}))
     (catch Exception e {:error (.getMessage e)})))
 
-(defn save-run
-  [run-result]
+(defn save-run [run-result]
   (let [results (:run run-result)
         path (str "./last-runs/" (:name (:config run-result)))
         content (str (json/write-str run-result) "\n")]
@@ -39,14 +39,14 @@
     (if-let [error (:error results)]
       (do (println job-name "pre step failed")
           (save-run {:pre {:error error}}))
-      (let [config-with-time (assoc config :run {:start-time (str (java.util.Date.))})]
+      (let [config-with-time (assoc config :run {:start-time (time-dump)})]
         (next config-with-time finish)))))
 
 (defn retry-handler [config]
   (loop [job-name (:name config)
          retries (or (:retries config) 0)
          errors []
-         results (execute config :handler)]
+         results (execute config :handler retries)]
     (if-let [error (:error results)]
       (do
         (println job-name "handler failed. Retries" retries)
@@ -69,7 +69,7 @@
     (if-let [error (:error results)]
       (do (println job-name "post failed")
           (save-run (assoc-in [:run :post] {:error error})))
-      (let [config-with-time (assoc-in config [:run :end-time] (str (java.util.Date.)))]
+      (let [config-with-time (assoc-in config [:run :end-time] (time-dump))]
         (save-run config-with-time)))))
 
 (defn handle [time config] (pre config handler post))
