@@ -38,7 +38,7 @@
     (println job-name "pre step running")
     (if-let [error (:error results)]
       (do (println job-name "pre step failed")
-          (save-run {:pre {:error error}}))
+          (save-run (assoc config :run {:pre {:error error}})))
       (let [config-with-time (assoc config :run {:start-time (time-dump)})]
         (next config-with-time finish)))))
 
@@ -46,7 +46,8 @@
   (loop [job-name (:name config)
          retries (or (:retries config) 0)
          errors []
-         results (execute config :handler retries)]
+         results (execute config :handler)]
+    (println "RESULTS" results "RETRIES" retries)
     (if-let [error (:error results)]
       (do
         (println job-name "handler failed. Retries" retries)
@@ -68,7 +69,7 @@
     (println job-name "post step running")
     (if-let [error (:error results)]
       (do (println job-name "post failed")
-          (save-run (assoc-in [:run :post] {:error error})))
+          (save-run (assoc-in config [:run :post] {:error error})))
       (let [config-with-time (assoc-in config [:run :end-time] (time-dump))]
         (save-run config-with-time)))))
 

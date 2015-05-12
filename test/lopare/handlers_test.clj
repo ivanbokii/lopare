@@ -38,7 +38,7 @@
                (pre config ..next.. ..finish..) => anything
                (provided
                 (execute config :pre) => {:error "the error"}
-                (save-run {:pre {:error "the error"}}) => anything :times 1)))
+                (save-run {:name ..name.. :run {:pre {:error "the error"}}}) => anything :times 1)))
        (fact "should call next function if there was no error"
              (let [config {:name ..name..}]
                (pre config ..next.. ..finish..) => anything
@@ -58,14 +58,31 @@
        (fact "should return success if no error"
              (retry-handler {:name "job"}) => {:error [] :success true}
              (provided
-              (execute {:name "job"} :handler 0) => ..results..))
+              (execute {:name "job"} :handler) => ..results..))
        (fact "should fail if there is an error"
              (retry-handler {:name "job"}) => {:error ["error"]}
              (provided
-              (execute {:name "job"} :handler 0) => {:error "error"})))
-       ;; (fact "should retry and retrun success if eventuall there was no error"
-       ;;       (let [config {:name "job" :retries 1}]
-       ;;         (retry-handler config) => {:error ["error"] :success true}
-       ;;         (provided
-       ;;          (execute config :handler :call 0) => {:error "error"}
-       ;;          (execute config :handler :call 1) => ..result..))))
+              (execute {:name "job"} :handler) => {:error "error"}))
+       (fact "should retry and retrun success if eventually there was no error"
+             (let [call (atom 0)]
+               (with-redefs [execute (fn [config step] (when (= @call 0) (swap! call inc) {:error "error"}))]
+                 (let [config {:name "job" :retries 1}]
+                   (retry-handler config) => {:error ["error"] :success true}))))
+       (fact "should fail if job always fail"
+             (let [config {:name "job" :retries 1}]
+               (retry-handler config) => {:error ["error" "error"]}
+               (provided
+                (execute config :handler) => {:error "error"}))))
+(facts "post"
+       (fact "should call save-run when there is was an error"
+             (let [config {:name ..name..}]
+               (post config) => anything
+               (provided
+                (save-run {:name ..name.. :run {:end-time ..time..}}) => anything :times 1
+                (#'lopare.handlers/time-dump) => ..time..)))
+       (fact "should save an error if there was an error"
+             (let [config {:name ..name..}]
+               (post config) => anything
+               (provided
+                (execute config :post) => {:error "error"}
+                (save-run {:name ..name.. :run {:post {:error "error"}}}) => anything :times 1))))
