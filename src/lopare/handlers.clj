@@ -23,7 +23,7 @@
 
 (defn save-run [run-result]
   (let [results (:run run-result)
-        path (str "./last-runs/" (:name (:config run-result)))
+        path (str "./last-runs/" (:name run-result))
         content (str (json/write-str run-result) "\n")]
     (spit path content :append true)))
 
@@ -47,7 +47,6 @@
          retries (or (:retries config) 0)
          errors []
          results (execute config :handler)]
-    (println "RESULTS" results "RETRIES" retries)
     (if-let [error (:error results)]
       (do
         (println job-name "handler failed. Retries" retries)

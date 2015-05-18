@@ -20,7 +20,7 @@
 
 (facts "save-run"
        (fact "should append to a run file"
-             (let [results {:config {:name ..run-results..}}]
+             (let [results {:name ..run-results..}]
                (save-run results) => anything
                (provided
                 (json/write-str results) => ..content..
