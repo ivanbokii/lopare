@@ -1,5 +1,5 @@
 all:
-	rm -r ./build
+	rm -rf ./build
 	lein uberjar
 	cp -r ./target/uberjar/ ./build
 	cp jobs.json ./build
